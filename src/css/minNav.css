@@ -1,0 +1,37 @@
+/* NAV2 */
+div.nv1 {
+    width: 100%;
+    padding: 10px 0;
+    flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1; /* Cambiado de -1 a 1 para asegurarse de que el contenido sea visible */
+    height: 35px;
+    margin-top: 6px;
+    background-color: #3087f8;
+}
+
+ul.itemsnv2 {
+    display: flex;
+    list-style-type: none; /* Elimina puntos de la lista */
+    margin: 0;
+    padding: 0;
+}
+
+ul.itemsnv2 li {
+    color: #cfd7df;
+    padding-right: 30px;
+}
+
+li.itemnv2 a.tooltip-link {
+    color: rgb(193, 211, 230);
+    text-decoration: none;
+    transition: color 0.3s ease, font-weight 0.3s ease; /* Suaviza la transición de color y peso de fuente */
+}
+
+li.itemnv2 a.tooltip-link:hover {
+    color: #ffffff;
+    font-weight: 500; /* Cambiado a 500 para un valor válido de font-weight */
+    cursor: pointer;
+}
