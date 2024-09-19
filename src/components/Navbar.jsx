@@ -200,6 +200,12 @@ const NavBar = () => {
                                 <span className="link">Favoritas</span>
                             </Link>
                         </li>
+                        <li className="list">
+                          <Link to="/Favoritos" className="nav-link">
+                          <i className="bx bx-trending-up icon" />
+                            <span className="link">Tendencias</span>
+                            </Link>
+                          </li>
                     </ul>
                     <div className="bottom-cotent">
                         <ul className="lists">
