@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useState } from 'react';
 import Filtros from '../components/Catalogo/Filtros';
 import '../css/catalogo.css';
 import NavBar from '../components/Navbar';
@@ -7,30 +7,36 @@ import Resultados from '../components/Catalogo/Resultados';
 
 const Catalog = () => {
     const [filtros, setFiltros] = useState({
-        busqueda: '',
         categoria: '',
-        region: '',
+        estilo: '',
+        tela: '',
+        acabado: '',
+        color: '',
+        tapizMaterial: '',
+        materialInterno: '',
         minPrecio: 0,
         maxPrecio: 1000000,
-      });
-    
+    });
 
     return (
-        <div classname="catalog">
-            <NavBar />
+        <div>
+         <NavBar />
+        <div className="catalog">
+            <h1>Catálogo de Muebles</h1>
 
-            <h1>Catálogo de Dulces</h1>
+            <div className="catalogo-container">
+            <div className="filterPM">
+            <Filtros filtros={filtros} setFiltros={setFiltros} />
 
-            <div className="catalog">
-             <div className="catalogo-container">
-                <Filtros filtros={filtros} setFiltros={setFiltros} />
+
+            </div>
+            <div className="filter RP">
                 <Resultados filtros={filtros} />
+                </div>
             </div>
+
             </div>
-
-
-
-            <Footer/>
+        <Footer />
         </div>
     );
 };

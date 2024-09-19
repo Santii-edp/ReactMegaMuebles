@@ -4,7 +4,8 @@ import axios from 'axios';
 import md5 from 'md5';
 import '../css/logreg.css';
 import Cookies from 'universal-cookie';
-import NavBar from '../components/Navbar';
+import Footer from '../components/Footer';
+import Navbar from '../components/Navbar';
 
 const baseUrl = "http://localhost:3001/users";
 const cookies = new Cookies();
@@ -16,31 +17,20 @@ class Login extends Component {
             password: ''
         },
         error: '',
-        redirect: null // Propiedad de estado para manejar la redirección
+        redirect: null,
+        isAuthenticated: false,
+        userRole: ''
     }
 
-    async componentDidMount() {
-        const role = cookies.get('role');
-        if (role) {
-            // Redirige automáticamente si el usuario ya está autenticado
-            switch (role) {
-                case 'Administrador':
-                    this.setState({ redirect: '/Adminmenu' });
-                    break;
-                case 'Cliente':
-                    this.setState({ redirect: '/Clientmenu' });
-                    break;
-                case 'user':
-                    this.setState({ redirect: '/Menu' });
-                    break;
-                default:
-                    this.setState({ error: 'Rol desconocido' });
-            }
+    componentDidMount() {
+        const userId = localStorage.getItem('userId');
+        if (userId) {
+            this.setState({ isAuthenticated: true });
         }
     }
 
-    handleChange = async e => {
-        await this.setState({
+    handleChange = e => {
+        this.setState({
             form: {
                 ...this.state.form,
                 [e.target.name]: e.target.value
@@ -49,62 +39,94 @@ class Login extends Component {
     }
 
     iniciarSesion = async (event) => {
-        event.preventDefault(); // Previene el comportamiento por defecto del formulario
+        event.preventDefault();
 
         try {
-            const response = await axios.get(baseUrl, { params: { email: this.state.form.email, password: md5(this.state.form.password) } });
-            if (response.data.length > 0) {
-                const respuesta = response.data[0]; // Accede al primer elemento del array
-                cookies.set('id', respuesta.id, { path: "/" });
-                cookies.set('username', respuesta.username, { path: "/" });
-                cookies.set('email', respuesta.email, { path: "/" });
-                cookies.set('role', respuesta.role, { path: "/" });
-
-                // Determina la redirección basada en el rol del usuario
-                switch (respuesta.role) {
-                    case 'Administrador':
-                        this.setState({ redirect: '/Adminmenu' });
-                        break;
-                    case 'Cliente':
-                        this.setState({ redirect: '/Clientmenu' });
-                        break;
-                    case 'Usuario':
-                        this.setState({ redirect: '/Menu' });
-                        break;
-                    default:
-                        this.setState({ error: 'Rol desconocido' });
+            const response = await axios.get(baseUrl, {
+                params: {
+                    email: this.state.form.email,
+                    password: md5(this.state.form.password)
                 }
+            });
+
+            const usuarios = response.data;
+            const usuario = usuarios.find(u => 
+                (u.email === this.state.form.email || u.correo === this.state.form.email) &&
+                (u.password === md5(this.state.form.password) || u.contraseña === md5(this.state.form.password))
+            );
+
+            if (usuario) {
+                cookies.set('id', usuario.id, { path: "/" });
+                cookies.set('username', usuario.username, { path: "/" });
+                cookies.set('email', usuario.email || usuario.correo, { path: "/" });
+                cookies.set('role', usuario.role || usuario.role, { path: "/" });
+
+                localStorage.setItem('userId', usuario.id.toString());
+
+                let redirectPath = '/user'; 
+                if (usuario.role === 'admin' || usuario.role === 'admin') {
+                    redirectPath = '/admin'; 
+                }
+
+                this.setState({ isAuthenticated: true, redirect: redirectPath, userRole: usuario.role || usuario.role });
             } else {
                 this.setState({ error: 'Correo electrónico o contraseña incorrectos' });
             }
         } catch (error) {
+            console.error('Error al intentar iniciar sesión:', error);
             this.setState({ error: 'Error al intentar iniciar sesión' });
         }
     }
 
     render() {
-        if (this.state.redirect) {
+        if (this.state.isAuthenticated && this.state.redirect) {
+            const isAdminPage = this.state.redirect === '/admin';
+            const isUserPage = this.state.redirect === '/user';
+            const roleMismatch = (isAdminPage && this.state.userRole !== 'admin') || (isUserPage && this.state.userRole !== 'user');
+
+            if (roleMismatch) {
+                return <Navigate to={this.state.userRole === 'admin' ? '/admin' : '/user'} />;
+            }
+
             return <Navigate to={this.state.redirect} />;
         }
 
         return (
-            <div className='n'><NavBar/>
-            <div className="form-container">
-                <h2>Iniciar Sesión</h2>
-                <form onSubmit={this.iniciarSesion}>
-                    <div className="input-group">
-                        <label htmlFor="email">Correo Electrónico:</label>
-                        <input type="text" id="email" name="email" onChange={this.handleChange} required />
+            <div>
+                <Navbar />
+                <div className='n'>
+                    <div className="form-container">
+                        <h2>Iniciar Sesión</h2>
+                        <form onSubmit={this.iniciarSesion} autoComplete="off">
+                            <div className="input-group">
+                                <label htmlFor="email">Correo Electrónico:</label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    value={this.state.form.email}
+                                    onChange={this.handleChange}
+                                    required
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label htmlFor="password">Contraseña:</label>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    value={this.state.form.password}
+                                    onChange={this.handleChange}
+                                    required
+                                />
+                            </div>
+                            {this.state.error && <p className="error">{this.state.error}</p>}
+                            <button type="submit" className="btnlr">Iniciar Sesión</button>
+                        </form>
+                        <p>¿No tienes una cuenta? <Link to="/Registro">Regístrate aquí</Link></p>
                     </div>
-                    <div className="input-group">
-                        <label htmlFor="password">Contraseña:</label>
-                        <input type="password" id="password" name="password" onChange={this.handleChange} required />
-                    </div>
-                    {this.state.error && <p className="error">{this.state.error}</p>}
-                    <button type="submit" className="btn">Iniciar Sesión</button>
-                </form>
-                <p>¿No tienes una cuenta? <Link to="/Register">Regístrate aquí</Link></p>
-            </div>
+                </div>
+                <Footer />
             </div>
         );
     }

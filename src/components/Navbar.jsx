@@ -1,38 +1,86 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import '../css/Navbar.css'; // Asegúrate de incluir tu archivo de estilos
+import React, { useState, useEffect, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import Cookies from 'universal-cookie';
 import Search from './search';
 import MinNav from './minNav';
+import '../css/Navbar.css';
+import AccountDropdown from './user/AccountDropdown';
+import { CartContext } from './CartContext'; // Asegúrate de que esta ruta sea correcta
+import LogoutButton from './user/LogoutButton';
+
+
+const cookies = new Cookies();
 
 const NavBar = () => {
-    
-    const [isOpen, setIsOpen] = useState(false);
-
-    const handleMenuClick = () => {
-        setIsOpen(!isOpen);
-    };
-
-    const handleOverlayClick = () => {
-        setIsOpen(false);
-    };
-
+    const { cartCount } = useContext(CartContext); // Obtenemos la cantidad de productos en el carrito
+    const [isNavOpen, setIsNavOpen] = useState(false);
+    const [isCartOpen, setIsCartOpen] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userRole, setUserRole] = useState('');
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const navigate = useNavigate();
+  
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (isOpen && !event.target.closest('nav')) {
-                setIsOpen(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isOpen]);
-
+      const fetchProducts = async () => {
+        try {
+         await axios.get('http://localhost:3001/products');
+          // Maneja los productos si es necesario
+        } catch (error) {
+          console.error('Error fetching products:', error);
+        }
+      };
+  
+      fetchProducts();
+  
+      // Verifica el estado de la sesión
+      const id = cookies.get('id');
+      const role = cookies.get('role');
+      if (id && role) {
+        setIsLoggedIn(true);
+        setUserRole(role);
+      }
+    }, []);
+  
+    const toggleNav = () => setIsNavOpen(!isNavOpen);
+    const toggleCart = () => setIsCartOpen(!isCartOpen);
+    const closeOverlay = () => {
+      setIsNavOpen(false);
+      setIsCartOpen(false);
+    };
+  
+    const handleAccountClick = () => {
+      setIsDropdownOpen(!isDropdownOpen);
+    };
+    const handleAccountRedirect = () => {
+      navigate('/user'); // Redirige a la página de cuenta del usuario
+    };
+  
+    const handleLogout = () => {
+      // Limpia las cookies
+      cookies.remove('id', { path: '/' });
+      cookies.remove('username', { path: '/' });
+      cookies.remove('email', { path: '/' });
+      cookies.remove('role', { path: '/' });
+  
+      // Actualiza el estado
+      setIsLoggedIn(false);
+      setUserRole('');
+  
+      // Cierra el dropdown
+      setIsDropdownOpen(false);
+  
+      // Redirige a la página de inicio
+      navigate('/');
+    };
+  
     return (
-        <nav className={isOpen ? 'open' : ''}>
+        <>
+        <nav className={isNavOpen ? 'open' : ''}>
             <div className="container">
                 <div className="nav-wrapper">
                     <div className="logo">
-                        <i className="bx bx-menu menu-icon" onClick={handleMenuClick}></i>
+                        <i className="bx bx-menu menu-icon" onClick={toggleNav}></i>
                         <span className="logoform">
                             <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
                                 <line id="line1" x1="150" y1="31.1" x2="100" y2="56.1" stroke="#ffffff" strokeWidth="6" />
@@ -57,36 +105,43 @@ const NavBar = () => {
                         <span className="logoname">MegaMuebles</span>
                     </div>
 
-                    <form className="from_search" role="search">
+                 
                         <Search/>
-                    </form>
+                  
                     <ul className="list_nav">
                         <li className="list">
                             <Link to="#" className="nav-link">
                                 <i className='bx bx-bell icon'></i>
                             </Link>
                         </li>
-                        <li className="list">
-                            <Link to="#" className="nav-link">
-                                <i className='bx bxs-cart icon'></i>
-                            </Link>
-                        </li>
-                        <li className="list">
-                            <Link className="nav-link" to="#" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i className="bx bxs-user-circle icon" />
-                            </Link>
-                        <ul className="dropdown-menu">
-                            <li><Link className="dropdown-item" to="/Register">Registrate</Link></li>
-                            <li><Link className="dropdown-item" to="/Login">Inicia Sesion</Link></li>
-                        </ul>
-                        </li>
+                      <li className="list">
+                        <div className="nav-link" onClick={handleAccountClick}>
+                          <i className="bx bx-user-circle icon">
+                            <span className="link">Cuenta</span>
+                          </i>
+                        </div>
+                        {isDropdownOpen && (
+                          <AccountDropdown 
+                            isLoggedIn={isLoggedIn} 
+                            userRole={userRole} 
+                            onLogout={handleLogout}
+                          />
+                        )}
+                      </li>
+                      <li className="list cart-icon">
+                        <Link to="/Carrito" className="nav-link" onClick={toggleCart}>
+                          <i className="bx bxs-cart cart-icon icon" />
+                          <span>{cartCount}</span>
+                        </Link>
+                      </li>
                     </ul>
+                  
                 </div>
             </div>
 
-            <div className={`sidebar ${isOpen ? 'open' : ''}`}>
+            <div className={`sidebar ${isNavOpen ? 'open' : ''}`}>
                 <div className="logo">
-                    <i className='bx bx-menu menu-icon' onClick={handleMenuClick}></i>
+                    <i className='bx bx-menu menu-icon' onClick={toggleNav}></i>
                     <span className="logoform">
                         <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
                             <line id="line1" x1="150" y1="31.1" x2="100" y2="56.1" stroke="#ffffff" strokeWidth="6" />
@@ -113,25 +168,34 @@ const NavBar = () => {
                 <div className="sidebar-content">
                     <ul className="lists">
                         <li className="list">
-                            <Link to="#" className="nav-link">
+                            <Link to="/" className="nav-link">
                                 <i className='bx bx-home-alt icon'></i>
                                 <span className="link">Inicio</span>
                             </Link>
                         </li>
                         <li className="list">
-                            <Link to="/" className="nav-link">
+                            <Link to="/Catalog" className="nav-link">
                                 <i className='bx bx-store icon'></i>
                                 <span className="link">Catalogo</span>
                             </Link>
                         </li>
                         <li className="list">
-                            <Link to="#" className="nav-link">
-                                <i className='bx bxs-cart icon'></i>
-                                <span className="link">Tu Carrito</span>
-                            </Link>
-                        </li>
+                            {isLoggedIn ? (
+                              <div className="nav-link" onClick={handleAccountRedirect}>
+                                <i className="bx bx-user-circle icon">
+                                  <span className="link"> Cuenta</span>
+                                </i>
+                              </div>
+                            ) : (
+                              <Link className="nav-link" to="/Login">
+                                <i className="bx bx-user-circle icon">
+                                  <span className="link"> Iniciar Sesión</span>
+                                </i>
+                              </Link>
+                            )}
+                          </li>
                         <li className="list">
-                            <Link to="#" className="nav-link">
+                            <Link to="/" className="nav-link">
                                 <i className='bx bx-heart icon'></i>
                                 <span className="link">Favoritas</span>
                             </Link>
@@ -140,26 +204,22 @@ const NavBar = () => {
                     <div className="bottom-cotent">
                         <ul className="lists">
                             <li className="list">
-                                <Link to="#" className="nav-link">
+                                <Link to="/AccountSettings" className="nav-link">
                                     <i className='bx bx-cog icon'></i>
                                     <span className="link">Configuraciones</span>
                                 </Link>
                             </li>
                             <li className="list">
-                                <Link to="#" className="nav-link">
-                                    <i className='bx bx-log-out icon'></i>
-                                    <span className="link">Cerrar Sesion</span>
-                                </Link>
-                            </li>
+                              <LogoutButton/>
+                          </li>
                         </ul>
                     </div>
                 </div>
             </div>
-
-            <MinNav/>
-
-            <section className={`overlay ${isOpen ? 'visible' : ''}`} onClick={handleOverlayClick}></section>
+            <section className={`overlay ${isNavOpen ? 'visible' : ''}`} onClick={closeOverlay}></section>
         </nav>
+        <MinNav/>
+        </>
     );
 };
 
