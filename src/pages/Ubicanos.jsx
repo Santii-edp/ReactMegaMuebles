@@ -40,7 +40,7 @@ const Ubicanos = () => {
               <ul className="hours-list">
                 <li><i className="bx bx-time-five icon" /> Lunes a Viernes: 9:00 AM - 6:00 PM</li>
                 <li><i className="bx bx-time-five icon" /> Sábados: 10:00 AM - 4:00 PM</li>
-                <li><i className="bx bx-time-five icon" /> Domingos: Cerrado</li>
+                <li><i className="bx bx-time-five icon" /> Domingos: 7:00 AM - 6:00 PM</li>
               </ul>
             </div>
 
