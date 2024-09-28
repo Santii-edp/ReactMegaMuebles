@@ -39,11 +39,11 @@ const Ubicanos = () => {
               <h4>Horarios de atención</h4>
               <ul className="hours-list">
                 <li><i className="bx bx-time-five icon" /> Lunes a Viernes: 9:00 AM - 6:00 PM</li>
-                <li><i className="bx bx-time-five icon" /> Sábados: 10:00 AM - 4:00 PM</li>
-                <li><i className="bx bx-time-five icon" /> Domingos: 7:00 AM - 6:00 PM</li>
+                <li><i className="bx bx-time-five icon" /> Sábados: 09:00 AM - 9:00 PM</li>
+                <li><i className="bx bx-time-five icon" /> Domingos: 6:00 AM - 7:00 PM</li>
               </ul>
             </div>
-
+s
             <div className="social-media">
               <h4>Conéctate con nosotros</h4>
               <div className="social-icons">
