@@ -15,9 +15,12 @@ import Index from "../pages/Index.jsx";
 import ProductCrud from '../components/ProductCrud'
 import AdminPage from "../pages/Admin.jsx";
 import UserPage from "../pages/User.jsx";
+<<<<<<< HEAD
 import Tendencias from "../pages/Tendencias.jsx";
 import SobreNosotros from "../pages/SobreNosotros.jsx";
 import Ubicanos from "../pages/Ubicanos.jsx";
+=======
+>>>>>>> 848e6c078db6171bcefd3e02812d84286d0d102d
 
 
 function App() {
@@ -39,9 +42,12 @@ function App() {
         <Route path="/ProductCrud" element={<ProductCrud />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/user" element={<UserPage />} />
+<<<<<<< HEAD
         <Route path="/Tendencias" element={<Tendencias />} />
         <Route path="/SobreNosotros" element={<SobreNosotros />} />
         <Route path="/Ubicanos" element={<Ubicanos />} />
+=======
+>>>>>>> 848e6c078db6171bcefd3e02812d84286d0d102d
 
 
 
